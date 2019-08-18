@@ -1,0 +1,32 @@
+{{ define "Index" }}
+    {{ template "Header" }}
+        {{ template "Menu" }}
+
+
+    <h2>Usuários Cadastrados</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <td>Usuário ID</td>
+                <td>Usuário Nome</td>
+                <td>Usuário Login</td>
+                <td>Usuário E-mail</td>
+                <td>Usuário Senha</td>
+                <td>Ações</td>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range . }}
+            <tr>
+                <td>{{ .UsuarioID }}</td>
+                <td>{{ .UsuarioNome }}</td>
+                <td>{{ .UsuarioLogin }}</td>
+                <td>{{ .UsuarioEmail }}</td>
+                <td>{{ .UsuarioSenha }}</td>
+                <td><a href="/show?id={{ .UsuarioID }}">Visualizar</a> | <a href="/edit?id={{ .UsuarioID }}">Editar</a></td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    {{ template "Footer" }}
+{{ end }}

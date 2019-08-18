@@ -2,11 +2,20 @@ package main
 
 import (
 	"database/sql" // Pacote Database SQL para realizar Query
+	"fmt"
 	"log"
 	"net/http"      // Gerencia URLs e Servidor Web
 	"text/template" // Gerencia templates
 
 	_ "github.com/denisenkom/go-mssqldb"
+)
+
+var (
+	server   = "DESKTOP-G7K5VG3\\SQLEXPRESS"
+	port     = 1434
+	user     = "AdminGo"
+	password = "servergo"
+	database = "Go"
 )
 
 type Usuarios struct {
@@ -19,24 +28,22 @@ type Usuarios struct {
 
 // Função dbConn, abre a conexão com o banco de dados
 func dbConn() (db *sql.DB) {
-	dbDriver := "mssql"
-	dbServer := "DESKTOP-G7K5VG3\\SQLEXPRESS"
-	dbUser := "AdminGo"
-	dbPass := "040195go"
-	dbName := "GO"
-
-	db, err := sql.Open(dbDriver, dbServer, dbUser+":"+dbPass+"@/"+dbName)
+	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
+		server, user, password, port, database)
+	conn, err := sql.Open("mssql", connString)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal("Falha ao conectar ao SqlServer: ", err.Error())
 	}
-	return db
+	return conn
 }
+
+var tmpl = template.Must(template.ParseGlob("tmpl/*"))
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	// Abre a conexão com o banco de dados utilizando a função dbConn()
 	db := dbConn()
 	// Realiza a consulta com banco de dados e trata erros
-	selDB, err := db.Query("SELECT * FROM Usuario ORDER BY UsuarioID DESC")
+	selDB, err := db.Query("SELECT * FROM Usuario ORDER BY UsuarioID ASC")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -71,7 +78,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Abre a página Index e exibe todos os registrados na tela
-	var tmpl = template.Must(template.ParseGlob("tmpl/*"))
 	tmpl.ExecuteTemplate(w, "Index", res)
 
 	// Fecha a conexão
@@ -114,7 +120,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Mostra o template
-	var tmpl = template.Must(template.ParseGlob("tmpl/*"))
 	tmpl.ExecuteTemplate(w, "Show", n)
 
 	// Fecha a conexão
@@ -122,7 +127,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
-	var tmpl = template.Must(template.ParseGlob("tmpl/*"))
 	tmpl.ExecuteTemplate(w, "New", nil)
 }
 
@@ -162,7 +166,6 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Mostra o template com formulário preenchido para edição
-	var tmpl = template.Must(template.ParseGlob("tmpl/*"))
 	tmpl.ExecuteTemplate(w, "Edit", n)
 
 	// Fecha a conexão com o banco de dados
@@ -179,53 +182,27 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 
 		// Pega os campos do formulário
 		UsuarioNome := r.FormValue("UsuarioNome")
+		UsuarioLogin := r.FormValue("UsuarioLogin")
 		UsuarioEmail := r.FormValue("UsuarioEmail")
 		UsuarioSenha := r.FormValue("UsuarioSenha")
-		UsuarioLogin := r.FormValue("UsuarioLogin")
-
+		
 		// Prepara a SQL e verifica errors
-		insForm, err := db.Prepare("INSERT INTO Usuario(UsuarioNome, UsuarioEmail, UsuarioSenha, UsuarioLogin) VALUES(?,?,?,?,?,?)")
+		insForm, err := db.Prepare("INSERT INTO Usuario(UsuarioNome, UsuarioLogin, UsuarioEmail, UsuarioSenha) VALUES(?,?,?,?)")
 		if err != nil {
 			panic(err.Error())
 		}
 
 		// Insere valores do formulario com a SQL tratada e verifica errors
-		insForm.Exec(UsuarioNome, UsuarioEmail, UsuarioSenha, UsuarioLogin)
+		insForm.Exec(UsuarioNome, UsuarioLogin, UsuarioEmail, UsuarioSenha)
 
 		// Exibe um log com os valores digitados no formulário
-		log.Println("INSERT: Nome: " + UsuarioNome + " | E-mail: " + UsuarioEmail)
+		log.Println("INSERT: Nome: " + UsuarioNome + " | E-mail: " + UsuarioEmail + " | Login: " + UsuarioLogin + " | Senha: " + UsuarioSenha)
 	}
 
 	// Encerra a conexão do dbConn()
 	defer db.Close()
 
 	//Retorna a HOME
-	http.Redirect(w, r, "/", 301)
-}
-
-func Delete(w http.ResponseWriter, r *http.Request) {
-
-	// Abre conexão com banco de dados usando a função: dbConn()
-	db := dbConn()
-
-	nId := r.URL.Query().Get("id")
-
-	// Prepara a SQL e verifica errors
-	delForm, err := db.Prepare("DELETE FROM Usuario WHERE UsuarioID=?")
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// Insere valores do form com a SQL tratada e verifica errors
-	delForm.Exec(nId)
-
-	// Exibe um log com os valores digitados no form
-	log.Println("DELETE")
-
-	// Encerra a conexão do dbConn()
-	defer db.Close()
-
-	// Retorna a HOME
 	http.Redirect(w, r, "/", 301)
 }
 
@@ -254,8 +231,34 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		insForm.Exec(UsuarioNome, UsuarioEmail, UsuarioSenha, UsuarioLogin, UsuarioID)
 
 		// Exibe um log com os valores digitados no formulario
-		log.Println("UPDATE: Name: " + UsuarioNome + " |E-mail: " + UsuarioEmail)
+		log.Println("UPDATE: Name: " + UsuarioNome + " | E-mail: " + UsuarioEmail + " | Login: " + UsuarioLogin + " | Senha: " + UsuarioSenha)
 	}
+
+	// Encerra a conexão do dbConn()
+	defer db.Close()
+
+	// Retorna a HOME
+	http.Redirect(w, r, "/", 301)
+}
+
+func Delete(w http.ResponseWriter, r *http.Request) {
+
+	// Abre conexão com banco de dados usando a função: dbConn()
+	db := dbConn()
+
+	nId := r.URL.Query().Get("id")
+
+	// Prepara a SQL e verifica errors
+	delForm, err := db.Prepare("DELETE FROM Usuario WHERE UsuarioID=?")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Insere valores do form com a SQL tratada e verifica errors
+	delForm.Exec(nId)
+
+	// Exibe um log com os valores digitados no form
+	log.Println("DELETE")
 
 	// Encerra a conexão do dbConn()
 	defer db.Close()

@@ -1,6 +1,16 @@
 {{ define "Edit" }}
-{{ template "Header" }}
-{{ template "Menu" }}
+    {{ template "Header"}}
+        {{ template "Menu"}}
+        <h2>Editar Usuário</h2>
 
-
+        <form method="POST" action="update">
+            <input type="hidden" name="UsuarioID" value="{{ .UsuarioID }}" />
+            <label> Usuário Nome </label><input type="text" name="UsuarioNome" value="{{ .UsuarioNome }}" /><br />
+            <label> Usuário Login </label><input type="text" name="UsuarioLogin" value="{{ .UsuarioLogin }}" /><br />
+            <label> Usuário E-mail </label><input type="text" name="UsuarioEmail" value="{{ .UsuarioEmail }}" /><br />
+            <label> Usuário Senha </label><input type="text" name="UsuarioSenha" value="{{ .UsuarioSenha }}" /><br />
+            <input type="submit" value="Salvar" />
+        </form><br />
+        <a href="/delete?id={{ .UsuarioID }}">Deletar</a>
+    {{ template "Footer"}}
 {{ end }}
