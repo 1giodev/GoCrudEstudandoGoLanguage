@@ -8,7 +8,7 @@
         <div class="card-body">
         <div class="row-fluid">
         <form method="POST" action="update">
-        <input type="hidden" name="UsuarioID" value="{{ UsuarioID }}" />     
+        <input type="hidden" name="UsuarioID" value="{{ .UsuarioID }}" />     
         <div class="form-group">
             <label for="UsuarioNome">Nome:</label>
             <input type="text" class="form-control" id="UsuarioNome" name="UsuarioNome" value="{{ .UsuarioNome }}">          
