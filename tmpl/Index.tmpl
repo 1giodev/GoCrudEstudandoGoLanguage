@@ -11,7 +11,6 @@
                 <th scope="col">Nome</td>
                 <th scope="col">Login</td>
                 <th scope="col">E-mail</td>
-                <th scope="col">Senha</td>
                 <th scope="col">Ações</td>
             </tr>
         </thead>
@@ -22,7 +21,6 @@
                 <td>{{ .UsuarioNome }}</td>
                 <td>{{ .UsuarioLogin }}</td>
                 <td>{{ .UsuarioEmail }}</td>
-                <td>{{ .UsuarioSenha }}</td>
                 <td>
                 <a href="/show?id={{ .UsuarioID }}" class="btn btn-primary btn-sm">Visualizar</a>
                 <a href="/edit?id={{ .UsuarioID }}" class="btn btn-success btn-sm">Editar</a>
