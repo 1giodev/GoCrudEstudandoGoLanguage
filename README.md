@@ -1,5 +1,3 @@
-# CrudGo-Estudando
--Início do Projeto
+# GoCrud
 
-
--Projeto de Teste Para Aprendizado de GO
+-Projeto de um Crud simples em GO com conexão e percistência de dados no Sql Server!
